@@ -1,94 +1,142 @@
-let score = [0,1,2,3,4,5,6]
-
+var possibleRuns = [0, 1]; 
 var team1 = {
-    name : "CSK",
-    runs : [],
-    score : 0
-}
-
+	name: "SRH",
+	runs: [],
+	score: 0
+};
 var team2 = {
-    name : "MI",
-    runs : [],
-    score : 0
-}
+	name: "CSK",
+	runs: [],
+	score: 0
+};
 
-var turn;
+var turn; 
+var confetti;
 
-
-window.onload = () => {
-    selectTrun();  //Deciding the toss
-    updateButton(); //Updating the button name and result
-    updateScore(); // Updating the scire iin the score board
-    updateRuns();
-} 
-
-
-//Es6 was of writing functions
-selectTrun = () =>{
-    turn = Math.round(Math.random())+1;
-}
-
-//Traditional way of writing function
-function updateButton() {
-    var button = document.getElementById("bat-button");
-    var result = document.getElementById("result")
-
-    result.style.visibility="";
-
-    button.textContent = `${turn === 1 ? team1.name : team2.name} Strike`
-
-    if(team1.runs.length ==6 && team2.runs.length ==6){
-        button.remove();
-
-        result.textContent = team1.score === team2.score ? 'It is draw': team1.score > team2.score ? team1.name + " Wins" : team2.name +" Wins"
-    }
-    else {
-        turn = team1.runs.length ===6 ? 2 : team2.runs.length === 6 ? 1 : turn; 
-    }
-}
+window.addEventListener("load", () => {
+	selectTurn(); 
+	updateButtonText(); 
+	updateScore(); 
+	updateNames(); 
 
 
-updateScore = () => {
+	var confettiSettings = {
+		target: "confetti-canvas",
+		props: ["square", "triangle", "line"],
+		clock: 70
+	};
+	confetti = new ConfettiGenerator(confettiSettings);
+});
 
-  document.getElementById("team-1-score").textContent = team1.score;
-  document.getElementById("team-2-score").textContent = team2.score;
-}
 
-var handleStrikeButton = () => {
-   
-    var runs = score[Math.floor(Math.random() * score.length)]
-    
-    runs = runs ===5 ? 'W' : runs
-    
-    if(turn === 1){
-        team1.runs.push(runs) 
-        team1.score = calculateScore(team1.runs)
-        console.log(team1.score)
-    }
-    else{
-        team2.runs.push(runs) 
-        team2.score = calculateScore(team2.runs)
-        console.log(team1.score)
-    }
-    updateButton();
-    updateRuns()
-    updateScore()
-}
+var handleStrikeButtonClick = () => {
 
-var calculateScore =(runs) =>{
-    return runs.map( (run) => {
-        return run == 'W'? 0 : run;
-        }
-    ).reduce( (total , runs) =>  total + runs) 
-}
+	var run = possibleRuns[Math.floor(Math.random() * possibleRuns.length)];
+	run = run === 8 ? "W" : run; 
+	
+	if (turn === 1) {
+		team1.runs.push(run); 
+		team1.score = calculateScore(team1.runs); 
+	} else {
+		team2.runs.push(run);
+		team2.score = calculateScore(team2.runs);
+	}
 
-updateRuns  =() =>{
-    var teamOneRoundElement = document.getElementById("team-1-round-runs").children;
-    var teamTwoRoundElement = document.getElementById("team-2-round-runs").children;
-    team1.runs.forEach( (run , index) =>{
-        teamOneRoundElement[index].textContent = run;
-    })
-    team2.runs.forEach( (run , index) =>{
-        teamTwoRoundElement[index].textContent = run;
-    })
-}
+	
+	
+	
+	updateScore();
+	updateButtonText();
+};
+
+var selectTurn = () => {
+	turn = Math.round(Math.random()) + 1;
+};
+
+var updateButtonText = () => {
+	var button = document.getElementById("strike-button"); 
+	var result = document.getElementById("result"); 
+	result.style.visibility = ""; 
+
+	if (team1.runs.length == 6 && team2.runs.length == 6) {
+		button.remove(); 
+
+		
+		result.textContent =
+			team1.score === team2.score
+				? `Its a draw`
+				: 
+				  `${team1.score > team2.score ? team1.name : team2.name} Wins`;
+
+		
+		confetti.render();
+		document.getElementById("confetti-canvas").style.zIndex = "1";
+	} else {
+		
+		turn = team1.runs.length === 6 ? 2 : team2.runs.length === 6 ? 1 : turn;
+
+		
+		button.textContent = `HIT (${turn === 1 ? team1.name : team2.name})`;
+	}
+};
+
+
+var updateScore = () => {
+	
+	document.getElementById("team-1-score").textContent = team1.score;
+	
+	document.getElementById("team-2-score").textContent = team2.score;
+	updateRuns(); 
+};
+
+
+var updateNames = () => {
+	document.getElementById("team-1-name").textContent = team1.name; 
+	document.getElementById("team-2-name").textContent = team2.name; 
+};
+
+var updateRuns = () => {
+	var teamOneRunsElement = document.getElementById("team-1-round-runs")
+		.children;
+	var teamTwoRunsElement = document.getElementById("team-2-round-runs")
+		.children;
+
+	team1.runs.forEach((run, index) => {
+		if(run==1)
+		{
+			teamOneRunsElement[index].style.backgroundColor="green";
+		}
+		else
+		{
+			teamOneRunsElement[index].style.backgroundColor="red";
+		}
+	});
+
+	team2.runs.forEach((run, index) => {
+		
+		if(run==1)
+		{
+			teamTwoRunsElement[index].style.backgroundColor="green";
+		}
+		else
+		{
+			teamTwoRunsElement[index].style.backgroundColor="red";
+		}
+	});
+};
+
+var calculateScore = runs => {
+	return runs
+		.map(num => {
+			return num == "W" ? 0 : num;
+		})
+		.reduce((total, num) => total + num);
+};
+(() => {
+	setTimeout(() => {
+	  document.getElementsByTagName("body")[0].style.backgroundColor = 'lightgreen';
+	}, 50)
+  })();
+  function sampleFunction() {
+	location.reload();
+  }
